@@ -4,8 +4,9 @@ using System.Collections;
 public class TestingManager : MonoBehaviour {
 	
 	static public float signalOffset;
+	static public bool testing;
 	
-	public float delayDur = 2.0F, cueDur = 0.1F, constantWaitDur = 1.5F, reachDur = 1.5F, signalRadius;
+	public float delayDur = 2.0F, cueDur = 0.1F, constantWaitDur = 1.5F, reactDur = 1.5F, signalRadius;
 	public GameObject centerTestObj, cue, signal;
 	public Material[] cueMaterials;
 	public Material invalidSignalMat;
@@ -14,8 +15,9 @@ public class TestingManager : MonoBehaviour {
 	private string state = "initialize";
 	private Timer testTimer;
 	private Variables varis;
-	private GameObject thisCue;
+	private GameObject thisCue, thisSig;
 	private Quaternion cylQuat;
+	private float rt, signalTime;
 	
 	// Use this for initialization
 	void Start ()
@@ -97,13 +99,43 @@ public class TestingManager : MonoBehaviour {
 				break;
 			}
 		case "signal":
-			GameObject sig = Instantiate(signal, varis.signalVec, Quaternion.identity) as GameObject;
+			thisSig = Instantiate(signal, varis.signalVec, Quaternion.identity) as GameObject;
 			if( !varis.valid )
 			{
-				sig.renderer.material = invalidSignalMat;
+				thisSig.renderer.material = invalidSignalMat;
 			}
+			signalTime = Time.time;
+			string displayMessage = "Signal displayed at " + Mathf.RoundToInt( Time.time * 1000 ).ToString()
+				+ System.Environment.NewLine;
+			System.IO.File.AppendAllText( Main.path, displayMessage );
 			state = "testing";
-			goto default;
+			goto case "testing";
+		case "testing":
+			testing = true;
+			if( CallTimer( reactDur ) )
+			{
+				WriteData( true, -0.001F, -0.001F );
+				Destroy( thisSig );
+				Reset();
+				break;
+			}
+			else if( !centerScript.Test() )
+			{
+				if( varis.valid )
+				{
+					rt = Time.time - signalTime;
+					state = "RTFound";
+					goto default;
+				}
+				else
+				{
+					WriteData( false, -0.001F, Time.time - signalTime );
+					Destroy( thisSig );
+					Reset();
+					break;
+				}
+			}
+			break;
 		default:
 			break;
 		}
@@ -128,8 +160,26 @@ public class TestingManager : MonoBehaviour {
 			}
 		}
 	}
+	public void SignalHit( float time )
+	{
+		WriteData( true, time - signalTime, rt );
+		Reset();
+	}
 	public void Reset()
 	{
 		state = "centering";
+		testing = false;
+		testTimer = null;
+	}
+	private void WriteData( bool success, float hit, float thisRT )
+	{
+		string angleString = ( Mathf.RoundToInt( varis.angle * Mathf.Rad2Deg ) ).ToString();
+		string rtString = ( Mathf.RoundToInt( thisRT * 1000F ) ).ToString();
+		string hitTimeString = ( Mathf.RoundToInt( hit * 1000F )).ToString();
+		string dataText = "Trial recorded at " + Mathf.RoundToInt( Time.time * 1000F ).ToString() + ":" + "\t" + 
+			angleString + "\t" + varis.cueType.ToString() + "\t" + varis.dir.ToString() + "\t" + 
+			System.Convert.ToInt16( varis.valid ) + "\t" + System.Convert.ToInt16( success ) + "\t" + hitTimeString + 
+			"\t" + rtString + System.Environment.NewLine;
+		System.IO.File.AppendAllText( Main.path, dataText );
 	}
 }

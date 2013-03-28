@@ -87,7 +87,7 @@ public class LeapUnityHandController : MonoBehaviour
 			updatePointable(Leap.Pointable.Invalid, finger);
 		}
 	}
-	void FixedUpdate()
+	void Update()
 	{
 		LeapInput.Update();
 	}

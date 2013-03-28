@@ -12,10 +12,11 @@ public class Signal : MonoBehaviour {
 	
 	void OnCollisionEnter( Collision col )
 	{
-		if( col.gameObject.tag == "FingerSpot" )
+		if( col.gameObject.tag == "FingerSpot" && col.gameObject.GetComponent<FingerSpot>().tracked )
 		{
+			col.gameObject.GetComponent<FingerSpot>().tracked = false;
 			Destroy( this.gameObject );
-			testingScript.Reset();
+			testingScript.SignalHit( Time.time );
 		}
 	}
 }

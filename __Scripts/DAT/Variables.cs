@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Variables {
 
-	public int cueIndex, cueType;
+	public int cueIndex, cueType, dir;
 	public Vector3 signalVec;
 	public float angle;
 	public bool valid;
@@ -19,10 +19,12 @@ public class Variables {
 		case 0:
 			angle = Mathf.Deg2Rad * 0;
 			cueType = 1;
+			dir = 1;
 			break;
 		case 1:
 			angle = Mathf.Deg2Rad * 180;
 			cueType = 1;
+			dir = 0;
 			break;
 		case 2:
 			angle = Random.Range(Mathf.Deg2Rad * (315 + TestingManager.signalOffset ), 
@@ -30,11 +32,13 @@ public class Variables {
 			if(angle >= 2 * Mathf.PI) //This prevents angles over 360 degrees. Without it the probe sometimes jumps around
 				angle -= 2 * Mathf.PI;
 			cueType = 2;
+			dir = 1;
 			break;
 		case 3:
 			angle = Random.Range(Mathf.Deg2Rad * (135 + TestingManager.signalOffset), 
 						Mathf.Deg2Rad * (225  - TestingManager.signalOffset));
 			cueType = 2;
+			dir = 0;
 			break;
 		case 4:
 			angle = Random.Range(Mathf.Deg2Rad * (270 + TestingManager.signalOffset), 
@@ -42,15 +46,25 @@ public class Variables {
 			if(angle >= 2 * Mathf.PI)
 				angle -= 2 * Mathf.PI;
 			cueType = 3;
+			dir = 1;
 			break;
 		case 5:
 			angle = Random.Range(Mathf.Deg2Rad * (90 + TestingManager.signalOffset), 
 						Mathf.Deg2Rad * (270  - TestingManager.signalOffset));
 			cueType = 3;
+			dir = 0;
 			break;
 		case 6:
 		case 7:
 			angle = Random.Range(Mathf.Deg2Rad * 0, Mathf.Deg2Rad * 360);
+			if( angle * Mathf.Rad2Deg >= 90 && angle * Mathf.Rad2Deg < 270.0F )
+			{
+				dir = 0;
+			}
+			else
+			{
+				dir = 1;
+			}
 			cueType = 4;
 			break;
 		}

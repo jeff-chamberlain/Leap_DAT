@@ -3,6 +3,8 @@ using System.Collections;
 
 public class CenterTest : MonoBehaviour {
 	
+	static public bool tracking;
+	
 	private ArrayList centeredFingers = new ArrayList();
 	
 	// Use this for initialization
@@ -14,9 +16,11 @@ public class CenterTest : MonoBehaviour {
 		switch( centeredFingers.Count )
 		{
 		case 0:
+			tracking = false;
 			return false;
 		case 1:
-			if( centeredFingers[0] != null)
+			GameObject trackedFinger = ( GameObject )centeredFingers[0];
+			if( (trackedFinger != null ) )
 			{
 				return true;
 			}
@@ -27,8 +31,8 @@ public class CenterTest : MonoBehaviour {
 		default:
 			for( int i = 0; i < centeredFingers.Count; i ++ )
 			{
-				print( centeredFingers[i] );
-				if( ( GameObject )centeredFingers[i] == null )
+				GameObject thisFinger = ( GameObject )centeredFingers[i];
+				if( (thisFinger == null ) )
 				{
 					centeredFingers.RemoveAt( i );
 				}
@@ -40,6 +44,8 @@ public class CenterTest : MonoBehaviour {
 	{
 		if( col.gameObject.tag == "FingerSpot" )
 		{
+			tracking = true;
+			col.gameObject.GetComponent<FingerSpot>().tracked = true;
 			centeredFingers.Add( col.gameObject );
 		}
 	}
@@ -47,6 +53,10 @@ public class CenterTest : MonoBehaviour {
 	{
 		if( col.gameObject.tag == "FingerSpot" )
 		{
+			if( !TestingManager.testing )
+			{
+				col.gameObject.GetComponent<FingerSpot>().tracked = false;
+			}
 			centeredFingers.Remove( col.gameObject );
 		}
 	}
